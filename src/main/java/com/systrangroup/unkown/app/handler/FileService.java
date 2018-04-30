@@ -12,6 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Request.Builder;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
 import lombok.extern.java.Log;
 
 @Log
@@ -47,7 +54,22 @@ public class FileService {
 		}
 	}
 	
-	public void fileSend() {
+	public Response fileSend(MultipartFile[] uploadfiles) {
+		try {
+			OkHttpClient client = new OkHttpClient();
+			Builder builder = new Request.Builder().url("http://192.168.0.22:8080/fileUpload");
+			
+			for (MultipartFile file : uploadfiles) {
+				builder.post(RequestBody.create(MediaType.parse(file.getContentType()), file.getBytes()));
+			}
+			Request req = builder.build();
+			
+			Response response = client.newCall(req).execute();
+			return response;
+		} catch (IOException e) {
+			log.info(e.getMessage());
+		}
 		
+		return null;
 	}
 }

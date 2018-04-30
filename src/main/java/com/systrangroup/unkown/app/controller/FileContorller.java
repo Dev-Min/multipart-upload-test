@@ -30,8 +30,8 @@ public class FileContorller {
 	}
 	
 	@ResponseStatus(HttpStatus.OK)
-	@RequestMapping(value = "/fileSend", method = RequestMethod.GET)
-	public void sendFile() {
-		
+	@RequestMapping(value = "/fileSend", method = RequestMethod.POST)
+	public void sendFile(@RequestParam("uploa dfile") MultipartFile[] uploadfiles) {
+		service.fileSend(uploadfiles);
 	}
 }
