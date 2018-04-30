@@ -6,14 +6,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.java.Log;
 
 @Log
-public class FileHandler {
+@Service
+public class FileService {
+	@Value("${mutipart.file.path}")
+	private String saveFilePath;
+	
 	public ResponseEntity<?> fileUpload(MultipartFile[] uploadfiles) {
 		File path = new File("");
 
