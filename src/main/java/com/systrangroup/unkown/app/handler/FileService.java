@@ -21,7 +21,7 @@ public class FileService {
 	private String saveFilePath;
 	
 	public ResponseEntity<?> fileUpload(MultipartFile[] uploadfiles) {
-		File path = new File("");
+		File path = new File(saveFilePath);
 
 		if (uploadfiles != null && uploadfiles.length > 0) {
 			for (MultipartFile uploadFile : uploadfiles) {
