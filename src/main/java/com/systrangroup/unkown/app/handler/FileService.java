@@ -60,6 +60,7 @@ public class FileService {
 			OkHttpClient client = new OkHttpClient();
 			Builder builder = new Request.Builder().url("http://192.168.0.22:8080/fileUpload");
 			MediaType mediaType = MediaType.parse("multipart/from-data;");
+			MultipartBuilder mBuilder = new MultipartBuilder();
 			
 			for (MultipartFile file : uploadfiles) {
 				String path = saveFilePath + file.getOriginalFilename();
@@ -73,9 +74,9 @@ public class FileService {
 				}
 				
 				File createFile = new File(path);
-				RequestBody body = new MultipartBuilder().addFormDataPart("uploadfile", createFile.getName(), RequestBody.create(mediaType, createFile)).build();
-				builder.post(body);
+				mBuilder = mBuilder.addFormDataPart("uploadfile", createFile.getName(), RequestBody.create(mediaType, createFile));
 			}
+			builder.post(mBuilder.build());
 			Request req = builder.build();
 			
 			client.newCall(req).execute();
