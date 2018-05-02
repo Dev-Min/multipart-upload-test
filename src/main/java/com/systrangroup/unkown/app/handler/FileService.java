@@ -13,12 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Request.Builder;
 import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
 
+import lombok.Cleanup;
 import lombok.extern.java.Log;
 
 @Log
@@ -54,22 +55,32 @@ public class FileService {
 		}
 	}
 	
-	public Response fileSend(MultipartFile[] uploadfiles) {
+	public void fileSend(MultipartFile[] uploadfiles) {
 		try {
 			OkHttpClient client = new OkHttpClient();
 			Builder builder = new Request.Builder().url("http://192.168.0.22:8080/fileUpload");
+			MediaType mediaType = MediaType.parse("multipart/from-data;");
 			
 			for (MultipartFile file : uploadfiles) {
-				builder.post(RequestBody.create(MediaType.parse(file.getContentType()), file.getBytes()));
+				String path = saveFilePath + file.getOriginalFilename();
+				@Cleanup OutputStream out = new FileOutputStream(path);
+				@Cleanup BufferedInputStream bis = new BufferedInputStream(file.getInputStream());
+				
+				byte[] buffer = new byte[1024];
+				int read;
+				while ((read = bis.read(buffer)) > 0) {
+					out.write(buffer, 0, read);
+				}
+				
+				File createFile = new File(path);
+				RequestBody body = new MultipartBuilder().addFormDataPart("uploadfile", createFile.getName(), RequestBody.create(mediaType, createFile)).build();
+				builder.post(body);
 			}
 			Request req = builder.build();
 			
-			Response response = client.newCall(req).execute();
-			return response;
+			client.newCall(req).execute();
 		} catch (IOException e) {
 			log.info(e.getMessage());
 		}
-		
-		return null;
 	}
 }

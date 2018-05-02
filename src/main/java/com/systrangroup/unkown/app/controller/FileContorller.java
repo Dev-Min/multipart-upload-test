@@ -25,13 +25,13 @@ public class FileContorller {
 	 */
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = "/fileUpload", method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<?> uploadFile(@RequestParam("uploa dfile") MultipartFile[] uploadfiles) {
+	public @ResponseBody ResponseEntity<?> uploadFile(@RequestParam("uploadfile") MultipartFile[] uploadfiles) {
 		return service.fileUpload(uploadfiles);
 	}
 	
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value = "/fileSend", method = RequestMethod.POST)
-	public void sendFile(@RequestParam("uploa dfile") MultipartFile[] uploadfiles) {
+	public void sendFile(@RequestParam("uploadfile") MultipartFile[] uploadfiles) {
 		service.fileSend(uploadfiles);
 	}
 }
