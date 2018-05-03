@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,5 +32,17 @@ public class FileContorller {
 	@RequestMapping(value = "/fileSend", method = RequestMethod.POST)
 	public void sendFile(@RequestParam("uploadfile") MultipartFile[] uploadfiles) {
 		service.fileSend(uploadfiles);
+	}
+	
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping(value="/binarySend", method = RequestMethod.POST)
+	public void binarySend(@RequestParam("uploadfile") MultipartFile[] uploadFile) {
+		service.binarySend(uploadFile);
+	}
+	
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping(value="/binaryUpload", method = RequestMethod.POST)
+	public void binaryUpload(@RequestBody String jsonFileData) {
+		service.binaryToFile(jsonFileData);
 	}
 }

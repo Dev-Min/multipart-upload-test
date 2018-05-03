@@ -1,17 +1,26 @@
 package com.systrangroup.unkown.app.handler;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -85,6 +94,97 @@ public class FileService {
 			
 			client.newCall(req).execute();
 		} catch (IOException e) {
+			log.info(e.getMessage());
+		}
+	}
+	
+	public void binarySend(MultipartFile[] uploadfiles) {
+		try {
+			Gson gson = new Gson();
+			JsonArray jsonArray = new JsonArray();
+			
+			for (MultipartFile file : uploadfiles) {
+				String fileName = file.getOriginalFilename();
+				String path = saveFilePath + fileName;
+				@Cleanup OutputStream out = new FileOutputStream(path);
+				@Cleanup BufferedInputStream bis = new BufferedInputStream(file.getInputStream());
+				
+				byte[] buffer = new byte[1024];
+				int read;
+				while ((read = bis.read(buffer)) > 0) {
+					out.write(buffer, 0, read);
+				}
+				
+				File tgtFile = new File(path);
+				Optional<String> result = fileToString(tgtFile);
+				if (result.isPresent()) {
+					String binary = result.get();
+					log.info(binary);
+					JsonObject json = new JsonObject();
+					json.addProperty("name", fileName);
+					json.addProperty("file", binary + "");
+					jsonArray.add(json);
+				}
+			}
+			
+			OkHttpClient client = new OkHttpClient();
+			MediaType mediaType = MediaType.parse("application/json");
+			RequestBody body = RequestBody.create(mediaType, gson.toJson(jsonArray));
+			Request request = new Request.Builder().url(address + "binaryUpload").post(body).build();
+			
+			client.newCall(request).execute();
+		} catch(IOException e) {
+			log.warning(e.getMessage());
+		}
+	}
+	
+	public void binaryToFile(String jsonFileData) {
+		JsonParser jsonParser = new JsonParser();
+		JsonElement jsonElement = jsonParser.parse(jsonFileData);
+		JsonArray jsonArray = jsonElement.getAsJsonArray();
+		jsonArray.forEach(json -> {
+			String fileData = json.getAsJsonObject().get("file").getAsString();
+			String fileName = json.getAsJsonObject().get("name").getAsString();
+			
+			File file = new File(saveFilePath);
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+			
+			stringToFile(fileData, fileName);
+		});
+	}
+	
+	private Optional<String> fileToString(File tgtFile) {
+		Optional<String> result = Optional.empty();
+		try {
+			@Cleanup FileInputStream fis = new FileInputStream(tgtFile);
+			@Cleanup ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+			int length = 0;
+			byte[] buf = new byte[1024];
+			while((length = fis.read(buf)) > 0) {
+				baos.write(buf, 0, length);
+			}
+			
+			byte[] fileArray = baos.toByteArray();
+			result = Optional.of(new String(Base64.encodeBase64(fileArray)));
+	        
+		} catch (IOException e) {
+			log.info(e.getMessage());
+		}
+		
+		return result;
+	}
+	
+	private void stringToFile(String res, String name) {
+		try {
+			File resultFile = new File(saveFilePath + name);
+	        @Cleanup FileOutputStream fos = new FileOutputStream(resultFile);
+	        
+	        byte[] fileData = Base64.decodeBase64(res);
+	        fos.write(fileData);
+		} catch(IOException e) {
 			log.info(e.getMessage());
 		}
 	}
