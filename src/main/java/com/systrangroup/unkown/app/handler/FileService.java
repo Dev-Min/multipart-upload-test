@@ -21,6 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -137,8 +138,17 @@ public class FileService {
 			Request request = new Request.Builder().url(address + "binaryUpload").post(body).build();
 			
 			log.info("Start sending binary file");
-			Response response = client.newCall(request).execute();
-			log.info(response.message());
+			client.newCall(request).enqueue(new Callback() {
+				@Override
+				public void onResponse(Response response) throws IOException {
+					log.info("Binary file sending complete");
+				}
+				
+				@Override
+				public void onFailure(Request request, IOException e) {
+					log.warning(e.getMessage());
+				}
+			});
 		} catch(IOException e) {
 			log.warning(e.getMessage());
 		}
