@@ -27,6 +27,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Request.Builder;
 import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import lombok.Cleanup;
 import lombok.extern.java.Log;
@@ -103,8 +104,11 @@ public class FileService {
 			Gson gson = new Gson();
 			JsonArray jsonArray = new JsonArray();
 			
+			log.info("Upload File Size : " + uploadfiles.length);
+			
 			for (MultipartFile file : uploadfiles) {
 				String fileName = file.getOriginalFilename();
+				log.info(fileName);
 				String path = saveFilePath + fileName;
 				@Cleanup OutputStream out = new FileOutputStream(path);
 				@Cleanup BufferedInputStream bis = new BufferedInputStream(file.getInputStream());
@@ -119,11 +123,11 @@ public class FileService {
 				Optional<String> result = fileToString(tgtFile);
 				if (result.isPresent()) {
 					String binary = result.get();
-					log.info(binary);
 					JsonObject json = new JsonObject();
 					json.addProperty("name", fileName);
 					json.addProperty("file", binary + "");
 					jsonArray.add(json);
+					log.info("Create Json Data");
 				}
 			}
 			
@@ -132,7 +136,9 @@ public class FileService {
 			RequestBody body = RequestBody.create(mediaType, gson.toJson(jsonArray));
 			Request request = new Request.Builder().url(address + "binaryUpload").post(body).build();
 			
-			client.newCall(request).execute();
+			log.info("Start sending binary file");
+			Response response = client.newCall(request).execute();
+			log.info(response.message());
 		} catch(IOException e) {
 			log.warning(e.getMessage());
 		}
@@ -145,13 +151,14 @@ public class FileService {
 		jsonArray.forEach(json -> {
 			String fileData = json.getAsJsonObject().get("file").getAsString();
 			String fileName = json.getAsJsonObject().get("name").getAsString();
-			
 			File file = new File(saveFilePath);
 			if (!file.exists()) {
 				file.mkdirs();
 			}
 			
+			log.info(fileName + " file create");
 			stringToFile(fileData, fileName);
+			log.info(fileName + " file create complete");
 		});
 	}
 	
