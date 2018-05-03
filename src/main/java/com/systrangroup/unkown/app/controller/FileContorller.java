@@ -42,7 +42,7 @@ public class FileContorller {
 	
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(value="/binaryUpload", method = RequestMethod.POST)
-	public void binaryUpload(@RequestBody String jsonFileData) {
-		service.binaryToFile(jsonFileData);
+	public @ResponseBody ResponseEntity<?> binaryUpload(@RequestBody String jsonFileData) {
+		return service.binaryToFile(jsonFileData);
 	}
 }

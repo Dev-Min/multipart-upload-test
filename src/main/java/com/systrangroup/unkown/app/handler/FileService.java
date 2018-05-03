@@ -144,22 +144,27 @@ public class FileService {
 		}
 	}
 	
-	public void binaryToFile(String jsonFileData) {
+	public ResponseEntity<?> binaryToFile(String jsonFileData) {
 		JsonParser jsonParser = new JsonParser();
 		JsonElement jsonElement = jsonParser.parse(jsonFileData);
 		JsonArray jsonArray = jsonElement.getAsJsonArray();
-		jsonArray.forEach(json -> {
-			String fileData = json.getAsJsonObject().get("file").getAsString();
-			String fileName = json.getAsJsonObject().get("name").getAsString();
-			File file = new File(saveFilePath);
-			if (!file.exists()) {
-				file.mkdirs();
-			}
-			
-			log.info(fileName + " file create");
-			stringToFile(fileData, fileName);
-			log.info(fileName + " file create complete");
-		});
+		if (!jsonArray.isJsonNull()) {
+			jsonArray.forEach(json -> {
+				String fileData = json.getAsJsonObject().get("file").getAsString();
+				String fileName = json.getAsJsonObject().get("name").getAsString();
+				File file = new File(saveFilePath);
+				if (!file.exists()) {
+					file.mkdirs();
+				}
+				
+				log.info(fileName + " file create");
+				stringToFile(fileData, fileName);
+				log.info(fileName + " file create complete");
+			});
+			return new ResponseEntity<>(HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
 	}
 	
 	private Optional<String> fileToString(File tgtFile) {
