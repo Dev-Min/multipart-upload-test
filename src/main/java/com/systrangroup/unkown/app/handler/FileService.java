@@ -1,10 +1,8 @@
 package com.systrangroup.unkown.app.handler;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -21,7 +19,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -35,7 +32,7 @@ import lombok.extern.java.Log;
 @Log
 @Service
 public class FileService {
-	@Value("${mutlipart.file.path}")
+	@Value("${multipart.file.path}")
 	private String saveFilePath;
 	
 	@Value("${multipart.server.address}")
