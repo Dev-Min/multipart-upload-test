@@ -121,7 +121,7 @@ public class FileService {
 			OkHttpClient client = new OkHttpClient();
 			MediaType mediaType = MediaType.parse("application/json");
 			RequestBody body = RequestBody.create(mediaType, gson.toJson(jsonArray));
-			Request request = new Request.Builder().url("http://192.168.0.11:8080/binaryUpload").post(body).build();
+			Request request = new Request.Builder().url("http://192.168.0.22:8080/binaryUpload").post(body).build();
 			
 			client.newCall(request).execute();
 		} catch(IOException e) {
@@ -137,7 +137,7 @@ public class FileService {
 			byte[] fileData = json.getAsJsonObject().get("file").getAsString().getBytes();
 			String fileName = json.getAsJsonObject().get("name").getAsString();
 			
-			File file = new File("/Users/min/Documents/multipart-test-workspace/" + fileName);
+			File file = new File(saveFilePath + fileName);
 			if (!file.exists()) {
 				file.mkdirs();
 			}
