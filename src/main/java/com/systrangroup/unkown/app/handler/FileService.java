@@ -1,8 +1,10 @@
 package com.systrangroup.unkown.app.handler;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -33,8 +35,11 @@ import lombok.extern.java.Log;
 @Log
 @Service
 public class FileService {
-	@Value("${mutipart.file.path}")
+	@Value("${mutlipart.file.path}")
 	private String saveFilePath;
+	
+	@Value("${multipart.server.address}")
+	private String address;
 	
 	public ResponseEntity<?> fileUpload(MultipartFile[] uploadfiles) {
 		File path = new File(saveFilePath);
@@ -66,7 +71,7 @@ public class FileService {
 	public void fileSend(MultipartFile[] uploadfiles) {
 		try {
 			OkHttpClient client = new OkHttpClient();
-			Builder builder = new Request.Builder().url("http://192.168.0.22:8080/fileUpload");
+			Builder builder = new Request.Builder().url(address + "fileUpload");
 			MediaType mediaType = MediaType.parse("multipart/from-data;");
 			MultipartBuilder mBuilder = new MultipartBuilder();
 			
@@ -121,7 +126,7 @@ public class FileService {
 			OkHttpClient client = new OkHttpClient();
 			MediaType mediaType = MediaType.parse("application/json");
 			RequestBody body = RequestBody.create(mediaType, gson.toJson(jsonArray));
-			Request request = new Request.Builder().url("http://192.168.0.22:8080/binaryUpload").post(body).build();
+			Request request = new Request.Builder().url(address + "binaryUpload").post(body).build();
 			
 			client.newCall(request).execute();
 		} catch(IOException e) {
@@ -137,12 +142,13 @@ public class FileService {
 			byte[] fileData = json.getAsJsonObject().get("file").getAsString().getBytes();
 			String fileName = json.getAsJsonObject().get("name").getAsString();
 			
-			File file = new File(saveFilePath + fileName);
+			File file = new File(saveFilePath);
 			if (!file.exists()) {
 				file.mkdirs();
 			}
 			try {
-				Files.write(file.toPath(), fileData, StandardOpenOption.WRITE);
+				File createFile = new File(saveFilePath + fileName);
+				Files.write(createFile.toPath(), fileData, StandardOpenOption.CREATE);
 			}
 			catch (IOException e) {
 				e.printStackTrace();
