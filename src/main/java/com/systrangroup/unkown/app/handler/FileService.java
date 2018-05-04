@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
@@ -138,6 +139,7 @@ public class FileService {
 			Request request = new Request.Builder().url(address + "binaryUpload").post(body).build();
 			
 			log.info("Start sending binary file");
+			client.setConnectTimeout(10, TimeUnit.MINUTES);
 			client.newCall(request).enqueue(new Callback() {
 				@Override
 				public void onResponse(Response response) throws IOException {
