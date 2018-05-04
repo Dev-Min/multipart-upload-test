@@ -140,6 +140,8 @@ public class FileService {
 			
 			log.info("Start sending binary file");
 			client.setConnectTimeout(10, TimeUnit.MINUTES);
+			client.setReadTimeout(10, TimeUnit.MINUTES);
+			client.setWriteTimeout(10, TimeUnit.MINUTES);
 			client.newCall(request).enqueue(new Callback() {
 				@Override
 				public void onResponse(Response response) throws IOException {
