@@ -206,6 +206,8 @@ public class FileService {
 	        fos.write(fileData);
         } catch(IOException e) {
 			log.info(e.getMessage());
+		} finally {
+			log.info(resultFile.getName() + " create : " + resultFile.exists());
 		}
 	}
 }
