@@ -181,9 +181,9 @@ public class FileService {
 	
 	private Optional<String> fileToString(File tgtFile) {
 		Optional<String> result = Optional.empty();
-		try {
-			@Cleanup FileInputStream fis = new FileInputStream(tgtFile);
-			@Cleanup ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (
+				FileInputStream fis = new FileInputStream(tgtFile);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();) {
 
 			int length = 0;
 			byte[] buf = new byte[1024];
