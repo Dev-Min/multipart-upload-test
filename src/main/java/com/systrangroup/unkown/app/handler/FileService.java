@@ -47,9 +47,9 @@ public class FileService {
 
 		if (uploadfiles != null && uploadfiles.length > 0) {
 			for (MultipartFile uploadFile : uploadfiles) {
-				try {
-					@Cleanup OutputStream out = new FileOutputStream(path.getAbsolutePath() + File.separator + uploadFile.getOriginalFilename());
-					@Cleanup BufferedInputStream bis = new BufferedInputStream(uploadFile.getInputStream());
+				try (
+						OutputStream out = new FileOutputStream(path.getAbsolutePath() + File.separator + uploadFile.getOriginalFilename());
+						BufferedInputStream bis = new BufferedInputStream(uploadFile.getInputStream());) {
 					log.info("File Name : " + uploadFile.getOriginalFilename());
 					// Save the file locally
 					byte[] buffer = new byte[1024];
@@ -200,13 +200,11 @@ public class FileService {
 	}
 	
 	private void stringToFile(String res, String name) {
-		try {
-			File resultFile = new File(saveFilePath + name);
-	        @Cleanup FileOutputStream fos = new FileOutputStream(resultFile);
-	        
+		File resultFile = new File(saveFilePath + name);
+        try (FileOutputStream fos = new FileOutputStream(resultFile)) {
 	        byte[] fileData = Base64.decodeBase64(res);
 	        fos.write(fileData);
-		} catch(IOException e) {
+        } catch(IOException e) {
 			log.info(e.getMessage());
 		}
 	}
