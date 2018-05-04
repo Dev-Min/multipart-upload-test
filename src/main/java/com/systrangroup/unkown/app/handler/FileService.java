@@ -36,7 +36,7 @@ import lombok.extern.java.Log;
 
 @Log
 @Service
-public class FileService {
+public class FileService implements Callback{
 	@Value("${multipart.file.path}")
 	private String saveFilePath;
 	
@@ -142,17 +142,7 @@ public class FileService {
 			client.setConnectTimeout(10, TimeUnit.MINUTES);
 			client.setReadTimeout(10, TimeUnit.MINUTES);
 			client.setWriteTimeout(10, TimeUnit.MINUTES);
-			client.newCall(request).enqueue(new Callback() {
-				@Override
-				public void onResponse(Response response) throws IOException {
-					log.info("Binary file sending complete");
-				}
-				
-				@Override
-				public void onFailure(Request request, IOException e) {
-					log.warning(e.getMessage());
-				}
-			});
+			client.newCall(request).enqueue(this);
 		} catch(IOException e) {
 			log.warning(e.getMessage());
 		}
@@ -197,7 +187,7 @@ public class FileService {
 			result = Optional.of(new String(Base64.encodeBase64(fileArray)));
 	        
 		} catch (IOException e) {
-			log.info(e.getMessage());
+			log.warning(e.getMessage());
 		}
 		
 		return result;
@@ -209,9 +199,19 @@ public class FileService {
 	        byte[] fileData = Base64.decodeBase64(res);
 	        fos.write(fileData);
         } catch(IOException e) {
-			log.info(e.getMessage());
+			log.warning(e.getMessage());
 		} finally {
 			log.info(resultFile.getName() + " create : " + resultFile.exists());
 		}
+	}
+
+	@Override
+	public void onResponse(Response response) throws IOException {
+		log.info("Binary file sending complete");
+	}
+	
+	@Override
+	public void onFailure(Request request, IOException e) {
+		log.warning(e.getMessage());
 	}
 }
